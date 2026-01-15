@@ -19,22 +19,28 @@ class TrackingService {
     this.events.push(trackingEvent);
     
     // In production, you would send this to an analytics service
-    console.log('📊 Tracking Event:', trackingEvent);
+    if (process.env.NODE_ENV !== 'test') {
+      console.log('📊 Tracking Event:', trackingEvent);
+    }
     
     // Store in localStorage for demo purposes
     try {
-      const stored = localStorage.getItem('tracking_events');
-      const existingEvents = stored ? JSON.parse(stored) : [];
-      existingEvents.push(trackingEvent);
-      
-      // Keep only last 100 events
-      if (existingEvents.length > 100) {
-        existingEvents.shift();
+      if (typeof localStorage !== 'undefined') {
+        const stored = localStorage.getItem('tracking_events');
+        const existingEvents = stored ? JSON.parse(stored) : [];
+        existingEvents.push(trackingEvent);
+        
+        // Keep only last 100 events
+        if (existingEvents.length > 100) {
+          existingEvents.shift();
+        }
+        
+        localStorage.setItem('tracking_events', JSON.stringify(existingEvents));
       }
-      
-      localStorage.setItem('tracking_events', JSON.stringify(existingEvents));
     } catch (error) {
-      console.error('Failed to store tracking event:', error);
+      if (process.env.NODE_ENV !== 'test') {
+        console.error('Failed to store tracking event:', error);
+      }
     }
   }
 

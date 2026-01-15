@@ -66,6 +66,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           if (mappedUser.role === 'admin') {
             backendUser.role = 'admin';
           }
+
+          // Set user state
+          setUser(backendUser);
+          
+          // Track login
           trackingService.trackLogin(backendUser.id, mappedUser.provider);
           
           if (token) {
@@ -73,6 +78,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           }
         } catch (error) {
           console.error('Error setting up user:', error);
+          setUser(null);
         }
       } else {
         setUser(null);

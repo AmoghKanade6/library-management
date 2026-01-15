@@ -135,15 +135,20 @@ describe('MockBackend Service', () => {
       const { user } = await mockBackend.login('google', 'maxborrower@test.com', 'Max Borrower');
       const books = await mockBackend.getAllBooks();
       
+      // Ensure books have stock available
+      const availableBooks = books.filter(b => b.stock > 0).slice(0, 3);
+      
+      expect(availableBooks.length).toBeGreaterThanOrEqual(3);
+      
       // Borrow first book
-      await mockBackend.borrowBook(books[0].id, user.id, user.name);
+      await mockBackend.borrowBook(availableBooks[0].id, user.id, user.name);
       
       // Borrow second book
-      await mockBackend.borrowBook(books[1].id, user.id, user.name);
+      await mockBackend.borrowBook(availableBooks[1].id, user.id, user.name);
       
       // Try to borrow third book
       await expect(
-        mockBackend.borrowBook(books[2].id, user.id, user.name)
+        mockBackend.borrowBook(availableBooks[2].id, user.id, user.name)
       ).rejects.toThrow('You have already borrowed 2 books');
     });
 

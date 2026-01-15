@@ -40,8 +40,39 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, adminOnly = f
     );
   }
 
-  // If not authenticated, redirect to login immediately
-  if (!auth0IsAuthenticated || !isAuthenticated) {
+  // Wait for user setup if Auth0 is authenticated but our context isn't ready yet
+  if (auth0IsAuthenticated && !isAuthenticated && !user) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        minHeight: '100vh',
+        flexDirection: 'column',
+        gap: '20px',
+        fontSize: '16px',
+        color: '#666'
+      }}>
+        <div style={{
+          width: '50px',
+          height: '50px',
+          border: '4px solid rgba(25, 118, 210, 0.3)',
+          borderTopColor: '#1976d2',
+          borderRadius: '50%',
+          animation: 'spin 1s linear infinite'
+        }}></div>
+        <p>Setting up your account...</p>
+        <style>{
+          `@keyframes spin {
+            to { transform: rotate(360deg); }
+          }`
+        }</style>
+      </div>
+    );
+  }
+
+  // If not authenticated, redirect to login
+  if (!auth0IsAuthenticated || !isAuthenticated || !user) {
     return <Navigate to="/login" replace />;
   }
 
