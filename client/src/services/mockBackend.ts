@@ -68,14 +68,15 @@ let currentToken: string | null = null;
 
 export const mockBackend = {
   // Authentication
-  login: async (provider: 'google' | 'github', email: string, name: string): Promise<{ user: User; token: string }> => {
+  login: async (provider: 'google' | 'github', email: string, name: string, userId?: string): Promise<{ user: User; token: string }> => {
     await delay(800);
     
-    let user = users.find(u => u.email === email);
+    // Use provided userId (from Auth0) or email to find user
+    let user = userId ? users.find(u => u.id === userId) : users.find(u => u.email === email);
     
     if (!user) {
       user = {
-        id: Math.random().toString(36).substr(2, 9),
+        id: userId || Math.random().toString(36).substr(2, 9), // Use Auth0 ID if provided
         email,
         name,
         role: 'user',

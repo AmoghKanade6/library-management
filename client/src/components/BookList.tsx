@@ -35,15 +35,12 @@ const BookList: React.FC = () => {
     try {
       const allBooks = await apiService.getBooks();
       setBooks(allBooks);
-      
-      // Also refresh user data to get updated borrowedBooks
-      await refreshUser();
     } catch (err: any) {
       setError(err.message || 'Failed to load books');
     } finally {
       setLoading(false);
     }
-  }, [refreshUser]);
+  }, []);
 
   useEffect(() => {
     loadBooks();
@@ -78,8 +75,14 @@ const BookList: React.FC = () => {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-        <CircularProgress />
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center',
+        minHeight: '50vh',
+        mt: 4 
+      }}>
+        <CircularProgress size={60} />
       </Box>
     );
   }

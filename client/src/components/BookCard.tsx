@@ -21,7 +21,7 @@ interface BookCardProps {
 }
 
 const BookCard: React.FC<BookCardProps> = React.memo(({ book, onUpdate }) => {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -38,20 +38,20 @@ const BookCard: React.FC<BookCardProps> = React.memo(({ book, onUpdate }) => {
     setSuccess(null);
 
     try {
-      console.log('Borrowing book:', { userId: user.id, bookId: book.id, userName: user.name });
       const result = await apiService.borrowBook(user.id, book.id, user.name);
-      console.log('Borrow result:', result);
       
       setSuccess('Book borrowed successfully!');
       trackingService.trackBookBorrow(user.id, book.id, book.title);
       
-      // Refresh book list and user context without page reload
-      onUpdate();
+      // Refresh user context and UI simultaneously for smooth update
+      await Promise.all([
+        refreshUser(),
+        onUpdate()
+      ]);
       
       // Clear success message after 3 seconds
       setTimeout(() => setSuccess(null), 3000);
     } catch (err: any) {
-      console.error('Borrow error:', err);
       setError(err.message || 'Failed to borrow book');
       setTimeout(() => setError(null), 5000);
     } finally {
@@ -67,20 +67,20 @@ const BookCard: React.FC<BookCardProps> = React.memo(({ book, onUpdate }) => {
     setSuccess(null);
 
     try {
-      console.log('Returning book:', { userId: user.id, bookId: book.id });
       const result = await apiService.returnBook(user.id, book.id);
-      console.log('Return result:', result);
       
       setSuccess('Book returned successfully!');
       trackingService.trackBookReturn(user.id, book.id, book.title);
       
-      // Refresh book list and user context without page reload
-      onUpdate();
+      // Refresh user context and UI simultaneously for smooth update
+      await Promise.all([
+        refreshUser(),
+        onUpdate()
+      ]);
       
       // Clear success message after 3 seconds
       setTimeout(() => setSuccess(null), 3000);
     } catch (err: any) {
-      console.error('Return error:', err);
       setError(err.message || 'Failed to return book');
       setTimeout(() => setError(null), 5000);
     } finally {

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { User, AuthContextType } from '../types';
 import { mockBackend } from '../services/mockBackend';
@@ -54,25 +54,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           };
 
           // Sync with mock backend to get borrowedBooks from localStorage
+          // Pass Auth0 user ID to ensure consistency
           const { user: backendUser } = await mockBackend.login(
             mappedUser.provider,
             mappedUser.email,
-            mappedUser.name
+            mappedUser.name,
+            mappedUser.id // Pass Auth0 ID
           );
           
           // Update role if admin
           if (mappedUser.role === 'admin') {
             backendUser.role = 'admin';
           }
-
-          console.log('AuthContext: User setup complete', {
-            userId: backendUser.id,
-            borrowedBooks: backendUser.borrowedBooks
-          });
-
-          setUser(backendUser);
-          
-          // Track login
           trackingService.trackLogin(backendUser.id, mappedUser.provider);
           
           if (token) {
@@ -130,23 +123,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const refreshUser = async () => {
-    if (!auth0User) return;
+  const refreshUser = useCallback(async () => {
+    if (!auth0User) {
+      console.log('RefreshUser: No auth0User, skipping');
+      return;
+    }
     
     try {
       // Re-sync with localStorage to get updated borrowedBooks
       const users = JSON.parse(localStorage.getItem('library_users') || '[]');
       const currentUserId = auth0User.sub || '';
       const updatedUser = users.find((u: User) => u.id === currentUserId);
-      
       if (updatedUser) {
-        console.log('RefreshUser: Updated borrowed books', updatedUser.borrowedBooks);
-        setUser(updatedUser);
+        console.log('RefreshUser: Updating user state with borrowed books', updatedUser.borrowedBooks);
+        setUser(prev => ({
+          ...prev!,
+          borrowedBooks: updatedUser.borrowedBooks
+        }));
+      } else {
+        console.warn('RefreshUser: User not found in localStorage', { currentUserId, users });
       }
     } catch (error) {
       console.error('Error refreshing user:', error);
     }
-  };
+  }, [auth0User]);
 
   const value: AuthContextType = {
     user,

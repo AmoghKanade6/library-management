@@ -131,8 +131,16 @@ export const borrowBook = async (
   // Sync with localStorage
   const users = JSON.parse(localStorage.getItem('library_users') || '[]');
   const userIndex = users.findIndex((u: any) => u.id === userId);
+  
   if (userIndex !== -1 && response.data.user.borrowedBooks) {
     users[userIndex].borrowedBooks = response.data.user.borrowedBooks;
+    localStorage.setItem('library_users', JSON.stringify(users));
+  } else if (response.data.user.borrowedBooks) {
+    // Create new user entry if not found
+    users.push({
+      id: userId,
+      borrowedBooks: response.data.user.borrowedBooks
+    });
     localStorage.setItem('library_users', JSON.stringify(users));
   }
 
@@ -158,6 +166,7 @@ export const returnBook = async (
   // Sync with localStorage
   const users = JSON.parse(localStorage.getItem('library_users') || '[]');
   const userIndex = users.findIndex((u: any) => u.id === userId);
+  
   if (userIndex !== -1 && response.data.user.borrowedBooks !== undefined) {
     users[userIndex].borrowedBooks = response.data.user.borrowedBooks;
     localStorage.setItem('library_users', JSON.stringify(users));
