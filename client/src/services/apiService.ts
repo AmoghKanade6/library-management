@@ -89,11 +89,17 @@ export const createBook = async (bookData: {
 
 export const updateBookStock = async (
   bookId: string,
-  stock: number
+  stock: number,
+  totalCopies?: number
 ): Promise<Book> => {
+  const body: any = { stock };
+  if (totalCopies !== undefined) {
+    body.totalCopies = totalCopies;
+  }
+  
   const response = await apiCall<Book>(`/books/${bookId}/stock`, {
     method: 'PUT',
-    body: JSON.stringify({ stock }),
+    body: JSON.stringify(body),
   });
 
   if (!response.data) {

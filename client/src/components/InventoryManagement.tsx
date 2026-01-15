@@ -22,7 +22,7 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Book } from '../types';
-import { mockBackend } from '../services/mockBackend';
+import * as apiService from '../services/apiService';
 
 const InventoryManagement: React.FC = () => {
   const [books, setBooks] = useState<Book[]>([]);
@@ -45,7 +45,7 @@ const InventoryManagement: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const allBooks = await mockBackend.getAllBooks();
+      const allBooks = await apiService.getBooks();
       setBooks(allBooks);
     } catch (err: any) {
       setError(err.message || 'Failed to load books');
@@ -86,7 +86,11 @@ const InventoryManagement: React.FC = () => {
       const stock = parseInt(editDialog.stock);
       const totalCopies = parseInt(editDialog.totalCopies);
 
-      await mockBackend.updateStock(editDialog.book.id, stock, totalCopies);
+      if (stock < 0 || totalCopies < 0) {
+        throw new Error('Stock and total copies must be non-negative');
+      }
+
+      await apiService.updateBookStock(editDialog.book.id, stock, totalCopies);
       setSuccess('Stock updated successfully!');
       handleCloseDialog();
       loadBooks();
@@ -104,7 +108,7 @@ const InventoryManagement: React.FC = () => {
     setSuccess(null);
 
     try {
-      await mockBackend.deleteBook(bookId);
+      await apiService.deleteBook(bookId);
       setSuccess('Book deleted successfully!');
       loadBooks();
     } catch (err: any) {

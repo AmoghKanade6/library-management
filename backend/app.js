@@ -130,7 +130,7 @@ app.post('/api/books', (req, res) => {
 
 // PUT /api/books/:id/stock - Update book stock (Admin only)
 app.put('/api/books/:id/stock', (req, res) => {
-  const { stock } = req.body;
+  const { stock, totalCopies } = req.body;
   const book = books.find(b => b.id === req.params.id);
   
   if (!book) {
@@ -148,6 +148,26 @@ app.put('/api/books/:id/stock', (req, res) => {
   }
   
   const borrowedCount = book.borrowedBy.filter(b => b.status === 'borrowed').length;
+  
+  // If totalCopies is provided, update it
+  if (totalCopies !== undefined) {
+    if (totalCopies < 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Total copies cannot be negative'
+      });
+    }
+    
+    if (totalCopies < borrowedCount) {
+      return res.status(400).json({
+        success: false,
+        message: `Total copies cannot be less than currently borrowed count (${borrowedCount})`
+      });
+    }
+    
+    book.totalCopies = parseInt(totalCopies);
+  }
+  
   const maxAllowedStock = book.totalCopies - borrowedCount;
   
   if (stock > maxAllowedStock) {

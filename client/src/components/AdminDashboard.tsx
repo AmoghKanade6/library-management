@@ -7,7 +7,7 @@ import {
   CardContent,
   LinearProgress
 } from '@mui/material';
-import { mockBackend } from '../services/mockBackend';
+import * as apiService from '../services/apiService';
 import { Book } from '../types';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import InventoryIcon from '@mui/icons-material/Inventory';
@@ -16,13 +16,23 @@ import BookIcon from '@mui/icons-material/Book';
 
 const AdminDashboard: React.FC = () => {
   const [books, setBooks] = useState<Book[]>([]);
+  const [stats, setStats] = useState({
+    totalBooks: 0,
+    uniqueTitles: 0,
+    borrowedBooks: 0,
+    utilizationRate: 0
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const allBooks = await mockBackend.getAllBooks();
+        const [allBooks, statistics] = await Promise.all([
+          apiService.getBooks(),
+          apiService.getStatistics()
+        ]);
         setBooks(allBooks);
+        setStats(statistics);
       } catch (error) {
         console.error('Failed to load dashboard data:', error);
       } finally {
@@ -32,13 +42,12 @@ const AdminDashboard: React.FC = () => {
     loadData();
   }, []);
 
-  const totalBooks = books.reduce((sum, book) => sum + book.totalCopies, 0);
-  const availableBooks = books.reduce((sum, book) => sum + book.stock, 0);
-  const borrowedBooks = totalBooks - availableBooks;
-  const totalTitles = books.length;
-  const utilizationRate = totalBooks > 0 ? ((borrowedBooks / totalBooks) * 100).toFixed(1) : 0;
+  const totalBooks = stats.totalBooks;
+  const totalTitles = stats.uniqueTitles;
+  const borrowedBooks = stats.borrowedBooks;
+  const utilizationRate = stats.utilizationRate;
 
-  const stats = [
+  const statCards = [
     {
       title: 'Total Books',
       value: totalBooks,
@@ -91,7 +100,7 @@ const AdminDashboard: React.FC = () => {
           mb: 4
         }}
       >
-        {stats.map((stat, index) => (
+        {statCards.map((stat, index) => (
           <Card
             key={index}
             sx={{

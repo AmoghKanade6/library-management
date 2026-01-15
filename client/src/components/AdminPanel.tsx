@@ -43,7 +43,7 @@ const AdminPanel: React.FC = () => {
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Box sx={{ mb: 4 }}>
         <Typography variant="h3" component="h1" gutterBottom fontWeight="bold" color="primary">
-          🔧 Admin Control Panel
+          Admin Control Panel
         </Typography>
         <Typography variant="body1" color="text.secondary">
           Manage your library inventory and monitor system activity

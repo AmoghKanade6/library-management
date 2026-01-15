@@ -12,11 +12,17 @@ import {
   Typography,
   Chip
 } from '@mui/material';
-import { mockBackend } from '../services/mockBackend';
+import * as apiService from '../services/apiService';
 
 interface HistoryRecord {
-  book: any;
-  record: any;
+  userId: string;
+  userName: string;
+  bookId: string;
+  bookTitle: string;
+  borrowedDate: string;
+  returnDate?: string;
+  action: 'borrowed' | 'returned';
+  status: 'borrowed' | 'returned';
 }
 
 const BorrowHistory: React.FC = () => {
@@ -28,7 +34,7 @@ const BorrowHistory: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await mockBackend.getBorrowHistory();
+      const data = await apiService.getBorrowHistory();
       setHistory(data);
     } catch (err: any) {
       setError(err.message || 'Failed to load history');
@@ -82,14 +88,14 @@ const BorrowHistory: React.FC = () => {
             <TableBody>
               {history.map((item, index) => (
                 <TableRow key={index}>
-                  <TableCell>{item.book.title}</TableCell>
-                  <TableCell>{item.record.userName}</TableCell>
-                  <TableCell>{formatDate(item.record.borrowedDate)}</TableCell>
+                  <TableCell>{item.bookTitle}</TableCell>
+                  <TableCell>{item.userName}</TableCell>
+                  <TableCell>{formatDate(item.borrowedDate)}</TableCell>
                   <TableCell>
-                    {item.record.returnDate ? formatDate(item.record.returnDate) : '-'}
+                    {item.returnDate ? formatDate(item.returnDate) : '-'}
                   </TableCell>
                   <TableCell align="center">
-                    {item.record.status === 'borrowed' ? (
+                    {item.status === 'borrowed' ? (
                       <Chip label="Borrowed" color="warning" size="small" />
                     ) : (
                       <Chip label="Returned" color="success" size="small" />
