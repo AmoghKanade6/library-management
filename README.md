@@ -146,6 +146,11 @@ cd ../backend
 npm start
 ```
 
+## Admin Login
+
+Email : admin@library.com
+Password : Admin@123456
+
 ---
 
 ## 🛠️ Tech Stack

@@ -6,9 +6,10 @@ import { useAuth0 } from '@auth0/auth0-react';
 interface ProtectedRouteProps {
   children: React.ReactNode;
   adminOnly?: boolean;
+  redirectAdminToPanel?: boolean;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, adminOnly = false }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, adminOnly = false, redirectAdminToPanel = false }) => {
   const { user, isAuthenticated } = useAuth();
   const { isLoading: auth0Loading, isAuthenticated: auth0IsAuthenticated } = useAuth0();
 
@@ -74,6 +75,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, adminOnly = f
   // If not authenticated, redirect to login
   if (!auth0IsAuthenticated || !isAuthenticated || !user) {
     return <Navigate to="/login" replace />;
+  }
+
+  // If admin should be redirected to admin panel
+  if (redirectAdminToPanel && user?.role === 'admin') {
+    return <Navigate to="/admin" replace />;
   }
 
   if (adminOnly && user?.role !== 'admin') {

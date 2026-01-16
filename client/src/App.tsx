@@ -88,7 +88,7 @@ function App() {
                 <Route
                   path="/"
                   element={
-                    <ProtectedRoute>
+                    <ProtectedRoute redirectAdminToPanel>
                       <BookList />
                     </ProtectedRoute>
                   }

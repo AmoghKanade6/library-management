@@ -130,29 +130,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const refreshUser = useCallback(async () => {
-    if (!auth0User) {
-      console.log('RefreshUser: No auth0User, skipping');
+    if (!auth0User || !user) {
+      console.log('RefreshUser: No auth0User or user, skipping');
       return;
     }
     
     try {
       // Re-sync with localStorage to get updated borrowedBooks
       const users = JSON.parse(localStorage.getItem('library_users') || '[]');
-      const currentUserId = auth0User.sub || '';
+      const currentUserId = user.id; // Use the current user.id which matches what's in localStorage
       const updatedUser = users.find((u: User) => u.id === currentUserId);
+      
       if (updatedUser) {
         console.log('RefreshUser: Updating user state with borrowed books', updatedUser.borrowedBooks);
-        setUser(prev => ({
-          ...prev!,
-          borrowedBooks: updatedUser.borrowedBooks
-        }));
+        setUser(prev => prev ? {
+          ...prev,
+          borrowedBooks: updatedUser.borrowedBooks || []
+        } : null);
       } else {
-        console.warn('RefreshUser: User not found in localStorage', { currentUserId, users });
+        console.warn('RefreshUser: User not found in localStorage', { 
+          currentUserId, 
+          userIds: users.map((u: User) => u.id) 
+        });
       }
     } catch (error) {
       console.error('Error refreshing user:', error);
     }
-  }, [auth0User]);
+  }, [auth0User, user]);
 
   const value: AuthContextType = {
     user,

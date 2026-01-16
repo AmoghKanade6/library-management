@@ -11,9 +11,14 @@ const Login: React.FC = () => {
 
   useEffect(() => {
     const handleAuth = async () => {
-      // If fully authenticated (both Auth0 and our context), redirect to home
+      // If fully authenticated (both Auth0 and our context), redirect based on role
       if (auth0IsAuthenticated && isAuthenticated && user) {
-        navigate('/', { replace: true });
+        // Redirect admins to admin panel, regular users to books page
+        if (user.role === 'admin') {
+          navigate('/admin', { replace: true });
+        } else {
+          navigate('/', { replace: true });
+        }
         return;
       }
 

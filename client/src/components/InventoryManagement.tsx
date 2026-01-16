@@ -17,7 +17,8 @@ import {
   DialogContent,
   DialogActions,
   Typography,
-  Chip
+  Chip,
+  Paper
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -39,6 +40,14 @@ const InventoryManagement: React.FC = () => {
     book: null,
     stock: '',
     totalCopies: ''
+  });
+
+  const [borrowersDialog, setBorrowersDialog] = useState<{
+    open: boolean;
+    book: Book | null;
+  }>({
+    open: false,
+    book: null
   });
 
   const loadBooks = async () => {
@@ -73,6 +82,20 @@ const InventoryManagement: React.FC = () => {
       book: null,
       stock: '',
       totalCopies: ''
+    });
+  };
+
+  const handleShowBorrowers = (book: Book) => {
+    setBorrowersDialog({
+      open: true,
+      book
+    });
+  };
+
+  const handleCloseBorrowersDialog = () => {
+    setBorrowersDialog({
+      open: false,
+      book: null
     });
   };
 
@@ -165,7 +188,26 @@ const InventoryManagement: React.FC = () => {
                   <TableCell>{book.author}</TableCell>
                   <TableCell>{book.isbn}</TableCell>
                   <TableCell align="center">{book.stock}</TableCell>
-                  <TableCell align="center">{borrowedCount}</TableCell>
+                  <TableCell align="center">
+                    {borrowedCount > 0 ? (
+                      <Chip 
+                        label={borrowedCount} 
+                        color="primary" 
+                        size="small"
+                        onClick={() => handleShowBorrowers(book)}
+                        sx={{ 
+                          cursor: 'pointer',
+                          '&:hover': {
+                            background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                            transform: 'scale(1.05)'
+                          },
+                          transition: 'all 0.2s'
+                        }}
+                      />
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">0</Typography>
+                    )}
+                  </TableCell>
                   <TableCell align="center">{book.totalCopies}</TableCell>
                   <TableCell align="center">
                     {book.stock === 0 ? (
@@ -191,6 +233,57 @@ const InventoryManagement: React.FC = () => {
         </Table>
       </TableContainer>
 
+      {/* Borrowers Dialog */}
+      <Dialog open={borrowersDialog.open} onClose={handleCloseBorrowersDialog} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          Who Has Borrowed: {borrowersDialog.book?.title}
+        </DialogTitle>
+        <DialogContent>
+          {borrowersDialog.book && borrowersDialog.book.borrowedBy.filter(br => br.status === 'borrowed').length > 0 ? (
+            <Box sx={{ mt: 2 }}>
+              {borrowersDialog.book.borrowedBy
+                .filter(br => br.status === 'borrowed')
+                .map((borrower, index) => (
+                  <Paper 
+                    key={index} 
+                    elevation={2}
+                    sx={{ 
+                      p: 2, 
+                      mb: 2,
+                      background: 'linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%)',
+                      border: '1px solid rgba(99, 102, 241, 0.1)',
+                      borderRadius: 2
+                    }}
+                  >
+                    <Typography variant="subtitle1" fontWeight={600} color="primary">
+                      👤 {borrower.userName}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                      📅 Borrowed: {new Date(borrower.borrowedDate).toLocaleString()}
+                    </Typography>
+                    <Chip 
+                      label="Currently Borrowed" 
+                      color="warning" 
+                      size="small" 
+                      sx={{ mt: 1 }}
+                    />
+                  </Paper>
+                ))}
+            </Box>
+          ) : (
+            <Alert severity="info" sx={{ mt: 2 }}>
+              No one has currently borrowed this book.
+            </Alert>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseBorrowersDialog} variant="contained">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Edit Stock Dialog */}
       <Dialog open={editDialog.open} onClose={handleCloseDialog}>
         <DialogTitle>Update Stock - {editDialog.book?.title}</DialogTitle>
         <DialogContent>
