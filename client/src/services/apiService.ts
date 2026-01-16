@@ -74,6 +74,7 @@ export const createBook = async (bookData: {
   author: string;
   isbn: string;
   stock: number;
+  imageUrl?: string;
 }): Promise<Book> => {
   const response = await apiCall<Book>('/books', {
     method: 'POST',

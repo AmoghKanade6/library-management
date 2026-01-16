@@ -15,6 +15,7 @@ export interface Book {
   stock: number;
   totalCopies: number;
   borrowedBy: BorrowRecord[];
+  imageUrl?: string;
 }
 
 export interface BorrowRecord {

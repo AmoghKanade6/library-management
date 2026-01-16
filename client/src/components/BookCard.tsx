@@ -168,6 +168,39 @@ const BookCard: React.FC<BookCardProps> = React.memo(({ book, onUpdate }) => {
         }
       }}
     >
+      {book.imageUrl && (
+        <Box
+          sx={{
+            width: '100%',
+            height: 300,
+            overflow: 'hidden',
+            position: 'relative',
+            background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 2
+          }}
+        >
+          <img
+            src={book.imageUrl}
+            alt={book.title}
+            style={{
+              maxWidth: '100%',
+              maxHeight: '100%',
+              width: 'auto',
+              height: 'auto',
+              objectFit: 'contain',
+              transition: 'transform 0.4s ease',
+              borderRadius: '4px',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
+            }}
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = 'none';
+            }}
+          />
+        </Box>
+      )}
       <CardContent sx={{ flexGrow: 1, position: 'relative', zIndex: 1 }}>
         <Typography 
           variant="h6" 

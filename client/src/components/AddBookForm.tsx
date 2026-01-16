@@ -6,8 +6,13 @@ import {
   Alert,
   CircularProgress,
   Typography,
-  Stack
+  Stack,
+  Tab,
+  Tabs,
+  Card,
+  CardMedia
 } from '@mui/material';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import * as apiService from '../services/apiService';
 
 const AddBookForm: React.FC = () => {
@@ -16,8 +21,11 @@ const AddBookForm: React.FC = () => {
     author: '',
     isbn: '',
     stock: '',
-    totalCopies: ''
+    totalCopies: '',
+    imageUrl: ''
   });
+  const [imageTab, setImageTab] = useState(0);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -27,6 +35,34 @@ const AddBookForm: React.FC = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Image size must be less than 5MB');
+        return;
+      }
+
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setError('Please upload an image file');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setFormData({
+          ...formData,
+          imageUrl: base64String
+        });
+        setImagePreview(base64String);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -51,7 +87,8 @@ const AddBookForm: React.FC = () => {
         title: formData.title,
         author: formData.author,
         isbn: formData.isbn,
-        stock
+        stock,
+        imageUrl: formData.imageUrl
       });
 
       setSuccess('Book added successfully!');
@@ -60,8 +97,11 @@ const AddBookForm: React.FC = () => {
         author: '',
         isbn: '',
         stock: '',
-        totalCopies: ''
+        totalCopies: '',
+        imageUrl: ''
       });
+      setImagePreview(null);
+      setImageTab(0);
     } catch (err: any) {
       setError(err.message || 'Failed to add book');
     } finally {
@@ -113,6 +153,55 @@ const AddBookForm: React.FC = () => {
             value={formData.isbn}
             onChange={handleChange}
           />
+          <Box>
+            <Typography variant="subtitle2" sx={{ mb: 1, color: '#64748b' }}>
+              Book Cover Image (optional)
+            </Typography>
+            <Tabs value={imageTab} onChange={(_, newValue) => setImageTab(newValue)} sx={{ mb: 2 }}>
+              <Tab label="URL" />
+              <Tab label="Upload" />
+            </Tabs>
+            
+            {imageTab === 0 ? (
+              <TextField
+                fullWidth
+                label="Image URL"
+                name="imageUrl"
+                value={formData.imageUrl.startsWith('data:') ? '' : formData.imageUrl}
+                onChange={handleChange}
+                placeholder="https://example.com/book-cover.jpg"
+                helperText="Enter a URL to a book cover image"
+              />
+            ) : (
+              <Box>
+                <Button
+                  component="label"
+                  variant="outlined"
+                  startIcon={<CloudUploadIcon />}
+                  fullWidth
+                  sx={{ mb: 2 }}
+                >
+                  Upload Image
+                  <input
+                    type="file"
+                    hidden
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                  />
+                </Button>
+                {imagePreview && (
+                  <Card sx={{ maxWidth: 200, mx: 'auto' }}>
+                    <CardMedia
+                      component="img"
+                      image={imagePreview}
+                      alt="Preview"
+                      sx={{ height: 250, objectFit: 'contain' }}
+                    />
+                  </Card>
+                )}
+              </Box>
+            )}
+          </Box>
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
             <TextField
               fullWidth

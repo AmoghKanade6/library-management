@@ -15,7 +15,8 @@ let books = [
     isbn: '9780743273565',
     stock: 3,
     totalCopies: 5,
-    borrowedBy: []
+    borrowedBy: [],
+    imageUrl: 'https://images-na.ssl-images-amazon.com/images/I/71FTb9X6wsL.jpg'
   },
   {
     id: '2',
@@ -24,7 +25,8 @@ let books = [
     isbn: '9780061120084',
     stock: 0,
     totalCopies: 4,
-    borrowedBy: []
+    borrowedBy: [],
+    imageUrl: 'https://m.media-amazon.com/images/I/81aY1lxk+9L._AC_UF1000,1000_QL80_.jpg'
   },
   {
     id: '3',
@@ -33,7 +35,8 @@ let books = [
     isbn: '9780451524935',
     stock: 2,
     totalCopies: 6,
-    borrowedBy: []
+    borrowedBy: [],
+    imageUrl: 'https://m.media-amazon.com/images/I/71kxa1-0mfL._AC_UF1000,1000_QL80_.jpg'
   },
   {
     id: '4',
@@ -42,7 +45,8 @@ let books = [
     isbn: '9780141439518',
     stock: 5,
     totalCopies: 5,
-    borrowedBy: []
+    borrowedBy: [],
+    imageUrl: 'https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1320399351i/1885.jpg'
   },
   {
     id: '5',
@@ -51,7 +55,8 @@ let books = [
     isbn: '9780316769488',
     stock: 1,
     totalCopies: 3,
-    borrowedBy: []
+    borrowedBy: [],
+    imageUrl: 'https://m.media-amazon.com/images/I/8125BDk3l9L._AC_UF1000,1000_QL80_.jpg'
   }
 ];
 
@@ -90,7 +95,7 @@ app.get('/api/books/:id', (req, res) => {
 
 // POST /api/books - Create new book (Admin only)
 app.post('/api/books', (req, res) => {
-  const { title, author, isbn, stock } = req.body;
+  const { title, author, isbn, stock, imageUrl } = req.body;
   
   // Validation
   if (!title || !author || !isbn || stock === undefined) {
@@ -116,7 +121,8 @@ app.post('/api/books', (req, res) => {
     isbn,
     stock: parseInt(stock),
     totalCopies: parseInt(stock),
-    borrowedBy: []
+    borrowedBy: [],
+    imageUrl: imageUrl || undefined
   };
   
   books.push(newBook);
